@@ -7,8 +7,6 @@ https://github.com/paliandris02/fae-ev-ar-mintavetel-hibak-osszehasonlitasa
 
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
-import scipy.stats as stats
 
 def belso_szoras_func(df, i='', reteg = 'neighbourhood_group', ismerv = 'price'):
     belso_szoras = 0
@@ -24,8 +22,6 @@ def belso_szoras_func(df, i='', reteg = 'neighbourhood_group', ismerv = 'price')
     belso_var = np.sum(seged.Elemszam * seged.KorrigaltSzorasok**2)/np.sum(seged.Elemszam)
     belso_szoras = np.sqrt(belso_var)
     return belso_szoras
-
-
 
 # 1) 
 airbnb = pd.read_csv("AB_NYC_2019_Páli András_VBII48_II_témakör.csv")
@@ -150,7 +146,7 @@ for index in range(mintaDb):
         # hozzáfűzi az új mintát az előzőhöz (itt még minden adat megvan az egyedekről)
         egy_darab_AR_minta = pd.concat([egy_darab_AR_minta,temp_minta], axis=0)
     egy_darab_AR_minta.index = oszlopnevek
-    # hozzáfűzi a mintákat tartalmazó df-hez, itt már csak a price marad meg
+    # hozzáfűzi a mintákat tartalmazó df-hez, itt már csak a neighbourhood_group és a price marad meg
     airbnb_price_AR_minta[f'neighbourhood_group{index}'] = egy_darab_AR_minta['neighbourhood_group'].tolist()
     airbnb_price_AR_minta[f'price{index}'] = egy_darab_AR_minta['price'].tolist()
     
@@ -159,9 +155,6 @@ for index in range(mintaDb):
 airbnb_price_EV_minta['Atlagok'] = np.mean(airbnb_price_EV_minta.iloc[:,0:100], axis=1)
 airbnb_price_FAE_minta['Atlagok'] = np.mean(airbnb_price_FAE_minta.iloc[:,0:100], axis=1)
 airbnb_price_AR_minta = airbnb_price_AR_minta.append(np.mean(airbnb_price_AR_minta.iloc[0:100,0:400], axis=0), ignore_index=True)
-
-
-
 
 
 # 5
@@ -196,9 +189,6 @@ print({
        'ELVI AR MSE' : round(elvi_mse_atlag_AR, 3)
 })
 
-
-###############################################################
-
 #6
 
     # tapasztalati átlagos négyzetes hibák:
@@ -217,7 +207,7 @@ becsult_sokasagi_szoras_FAE = np.sqrt(np.mean(airbnb_price_FAE_minta['Korrigalt_
 becsult_sokasagi_szoras_AR = np.sqrt(np.mean(airbnb_price_AR_minta.loc[102:103,:], axis=1).iloc[0])
 
 
-tapasztalati_mse_atlag_EV = ( (becsult_sokasagi_szoras_FAE / np.sqrt(n)) * np.sqrt(1-(n/len(airbnb))) )**2
+tapasztalati_mse_atlag_EV = ( (becsult_sokasagi_szoras_EV / np.sqrt(n)) * np.sqrt(1-(n/len(airbnb))) )**2
 tapasztalati_mse_atlag_FAE = (becsult_sokasagi_szoras_FAE / np.sqrt(n))**2
 
 
@@ -248,8 +238,6 @@ tapasztalati_sh_atlag_FAE = np.sqrt(tapasztalati_mse_atlag_FAE)
 tapasztalati_sh_atlag_EV = np.sqrt(tapasztalati_mse_atlag_EV)
 tapasztalati_sh_atlag_AR = np.sqrt(tapasztalati_mse_atlag_AR)
 
-tapasztalati_sh_atlag_AR
-
 sh_elteresek = {
     'FAE elvi-tapasztalati' : round(elvi_sh_atlag_FAE -tapasztalati_sh_atlag_FAE,3)  ,
     'EV elvi-tapasztalati' : round(elvi_sh_atlag_EV - tapasztalati_sh_atlag_EV,3) ,     
@@ -264,93 +252,5 @@ sh_viszonyulasa_FAE_SHhoz={
 sh_viszonyulasa_FAE_SHhoz
 
 # varianciahányados és összefüggése az AR/EV SH-val
-(1-belso_szoras**2/sokasagi_szoras**2) * 100
+variancia_hanyados=(1-belso_szoras**2/sokasagi_szoras**2) * 100
 (elvi_sh_atlag_AR**2/elvi_sh_atlag_EV**2 -1) *100
-
-
-# RÉGI KÓDÓK    
-###################################################################
-    
-#reteg1 = airbnb.loc[airbnb['neighbourhood_group'] ==f'{uniqueNeighbourhoodGroups[0]}']
-#reteg2 = airbnb.loc[airbnb['neighbourhood_group'] ==f'{uniqueNeighbourhoodGroups[1]}']
-#reteg3 = airbnb.loc[airbnb['neighbourhood_group'] ==f'{uniqueNeighbourhoodGroups[2]}']
-#reteg4 = airbnb.loc[airbnb['neighbourhood_group'] ==f'{uniqueNeighbourhoodGroups[3]}']
-#reteg5 = airbnb.loc[airbnb['neighbourhood_group'] ==f'{uniqueNeighbourhoodGroups[4]}']
-
-#for index in range(mintaDb):
- #   minta1 = reteg1.sample(n=aranyok_lista[0], random_state = randomStateAR+index, replace=False)
-    
-  #  minta2 = reteg2.sample(n=aranyok_lista[1], random_state = randomStateAR+index, replace=False)
-    
- #   minta3 = reteg3.sample(n=aranyok_lista[2], random_state = randomStateAR+index, replace=False)
-    
- #   minta4 = reteg4.sample(n=aranyok_lista[3], random_state = randomStateAR+index, replace=False)
-    
- #   minta5 = reteg5.sample(n=aranyok_lista[4], random_state = randomStateAR+index, replace=False)
-    
- #   egy_darab_AR_minta = pd.concat([minta1, minta2, minta3, minta4, minta5], axis=0)
- #   egy_darab_AR_minta.index = oszlopnevek
-    
- #   airbnb_price_AR_minta = airbnb_price_AR_minta.append(egy_darab_AR_minta['price'], ignore_index=True)
-    
-
-
-
-
-
-"""
-elvi_mse_atlag_EV = np.sum((airbnb_price_EV_minta.Atlagok - sokasagi_atlag)**2)/mintaDb
-elvi_mse_atlag_FAE = np.sum((airbnb_price_FAE_minta.Atlagok - sokasagi_atlag)**2)/mintaDb
-elvi_mse_atlag_AR = np.sum((airbnb_price_AR_minta.Atlagok - sokasagi_atlag)**2)/mintaDb
-
-# ellenőrzés a másik képlettel
-np.mean((airbnb_price_EV_minta.Atlagok)-sokasagi_atlag)**2 + np.std(airbnb_price_EV_minta.Atlagok)**2
-np.mean((airbnb_price_FAE_minta.Atlagok)-sokasagi_atlag)**2 + np.std(airbnb_price_FAE_minta.Atlagok)**2
-np.mean((airbnb_price_AR_minta.Atlagok)-sokasagi_atlag)**2 + np.std(airbnb_price_AR_minta.Atlagok)**2
-
-
-round(np.mean(airbnb_price_EV_minta['Atlagok'])-sokasagi_atlag, 1)
-round(np.mean(airbnb_price_FAE_minta['Atlagok'])-sokasagi_atlag, 1)
-round(np.mean(airbnb_price_AR_minta['Atlagok'])-sokasagi_atlag, 1)
-
-# 6
-mintaatlag_atlag_EV = np.mean(airbnb_price_EV_minta.Atlagok)
-mintaatlag_atlag_FAE = np.mean(airbnb_price_FAE_minta.Atlagok)
-mintaatlag_atlag_AR = np.mean(airbnb_price_AR_minta.Atlagok)
-
-tapasztalati_mse_atlag_EV = np.sum((airbnb_price_EV_minta.Atlagok - mintaatlag_atlag_EV)**2)/mintaDb
-tapasztalati_mse_atlag_FAE = np.sum((airbnb_price_FAE_minta.Atlagok - mintaatlag_atlag_FAE)**2)/mintaDb
-tapasztalati_mse_atlag_AR = np.sum((airbnb_price_AR_minta.Atlagok - mintaatlag_atlag_AR)**2)/mintaDb
-
-# 7
-
-
-
-
-
-
-
-
-
-
-""""""
-airbnb_price_AR_minta = pd.DataFrame(columns=oszlopnevek)
-    
-randomStateAR = 40
-
-for index in range(mintaDb):
-    # egy darab mintavétel df definiálása
-    egy_darab_AR_minta = pd.DataFrame()
-    # egy darab mintavétel során, annyiszor fut le ez a ciklus, ahány réteg van, jelen esetben 5-ször fog
-    for j in range(len(uniqueNeighbourhoodGroups)):
-        # a sokaságból az összes olyan kiszedése ami az adott régiójú
-        temp_reteg = airbnb.loc[airbnb['neighbourhood_group'] ==f'{uniqueNeighbourhoodGroups[j]}'] 
-        # a rétegből EV mintavétel, hozzá tartozó aránnyal
-        temp_minta = temp_reteg.sample(n=aranyok_lista[j], random_state = randomStateAR+index, replace=False)
-        # hozzáfűzi az új mintát az előzőhöz (itt még minden adat megvan az egyedekről)
-        egy_darab_AR_minta = pd.concat([egy_darab_AR_minta,temp_minta], axis=0)
-    egy_darab_AR_minta.index = oszlopnevek
-    # hozzáfűzi a mintákat tartalmazó df-hez, itt már csak a price marad meg
-    airbnb_price_AR_minta = airbnb_price_AR_minta.append(egy_darab_AR_minta['price'], ignore_index=True)
-###############################################################        
-   """ 
